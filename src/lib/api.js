@@ -35,6 +35,12 @@ export async function adminLogin(username, password) {
 // --- COURSES ---
 
 export async function getCourses(status = 'approved') {
+    if (!supabase) {
+        console.warn('Supabase offline, returning mock courses');
+        const mock = (await import('../data/courses.js')).default;
+        return mock.filter(c => !status || c.status === status || (status === 'approved' && (!c.status || c.status === 'approved')));
+    }
+
     let query = supabase
         .from('courses')
         .select('*');
@@ -50,11 +56,15 @@ export async function getCourses(status = 'approved') {
         return [];
     }
 
-    // Sessions are handled naturally in the sessions field
     return data;
 }
 
 export async function getCourseById(id) {
+    if (!supabase || id.startsWith('course-')) {
+        const mock = (await import('../data/courses.js')).default;
+        return mock.find(c => c.id === id) || null;
+    }
+
     // 1. Get Course Details
     const { data: course, error: courseError } = await supabase
         .from('courses')
@@ -83,11 +93,16 @@ export async function getCourseById(id) {
 // --- APPLICATIONS ---
 
 export async function submitApplication(appData) {
+    if (!supabase) {
+        console.log('Mock: Application submitted', appData);
+        return { success: true, mock: true };
+    }
+
     const { data, error } = await supabase
         .from('applications')
         .insert([
             {
-                applicant_id: appData.applicant_id, // Optional (if logged in)
+                applicant_id: appData.applicant_id,
                 instructor_name: appData.instructor_name,
                 email: appData.email,
                 course_title: appData.course_title,
@@ -104,6 +119,8 @@ export async function submitApplication(appData) {
 }
 
 export async function getUserApplications(email) {
+    if (!supabase) return [];
+
     const { data, error } = await supabase
         .from('applications')
         .select('*')
@@ -120,11 +137,16 @@ export async function getUserApplications(email) {
 // --- ENROLLMENTS ---
 
 export async function enrollStudent(courseId, studentDetails) {
+    if (!supabase) {
+        console.log('Mock: Student enrolled', studentDetails);
+        return { success: true, mock: true };
+    }
+
     const userJson = localStorage.getItem('nexus_user');
     if (!userJson) throw new Error('User must be logged in to enroll');
     const user = JSON.parse(userJson);
 
-    // 1. Ensure Profile exists using the real user.id from Auth
+    // 1. Ensure Profile exists
     const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .upsert({
@@ -140,7 +162,6 @@ export async function enrollStudent(courseId, studentDetails) {
 
     if (profileError) {
         console.error('Profile sync error:', profileError);
-        // Continue anyway if profile creation fails? No, enrollments needs user_id FK
         throw new Error('Failed to sync user profile. Please try again.');
     }
 
@@ -162,14 +183,15 @@ export async function enrollStudent(courseId, studentDetails) {
 }
 
 export async function getUserEnrollments(email) {
-    // Fetch courses where user email matches profile
+    if (!supabase) return [];
+
     const { data, error } = await supabase
         .from('enrollments')
         .select(`
             *,
             courses (*)
         `)
-        .eq('profiles.email', email); // This join syntax might vary depending on RLS/schema
+        .eq('profiles.email', email);
 
     if (error) {
         console.error('Error fetching enrollments:', error);
@@ -188,13 +210,15 @@ export async function getUserEnrollments(email) {
 // --- ADMIN ---
 
 export async function getDashboardStats() {
-    // 1. Pending Apps
+    if (!supabase) {
+        return { pendingApps: 0, activeCourses: 5 }; // Mock values
+    }
+
     const { count: pendingApps } = await supabase
         .from('applications')
         .select('*', { count: 'exact', head: true })
         .eq('status', 'pending');
 
-    // 2. Active Courses (Only 'approved')
     const { count: activeCourses } = await supabase
         .from('courses')
         .select('*', { count: 'exact', head: true })
@@ -207,6 +231,8 @@ export async function getDashboardStats() {
 }
 
 export async function getPendingApplications() {
+    if (!supabase) return [];
+
     const { data, error } = await supabase
         .from('applications')
         .select('*')
@@ -221,9 +247,10 @@ export async function getPendingApplications() {
 }
 
 export async function approveApplication(appId, scheduleData) {
+    if (!supabase) throw new Error('Database connection required for approval.');
+
     console.log('🔄 Approving Application:', appId, scheduleData);
 
-    // 1. Get Application Data
     const { data: app, error: fetchError } = await supabase
         .from('applications')
         .select('*')
@@ -231,11 +258,9 @@ export async function approveApplication(appId, scheduleData) {
         .single();
 
     if (fetchError || !app) {
-        console.error('❌ Error fetching application details:', fetchError);
         throw new Error('Application details not found.');
     }
 
-    // 2. Insert into Courses
     const { error: courseError } = await supabase.from('courses').insert([{
         title: app.course_title,
         instructor: app.instructor_name,
@@ -248,27 +273,20 @@ export async function approveApplication(appId, scheduleData) {
         status: 'approved'
     }]);
 
-    if (courseError) {
-        console.error('❌ Error creating course:', courseError);
-        throw courseError;
-    }
+    if (courseError) throw courseError;
 
-    // 3. Update Application Status
     const { error: appError } = await supabase
         .from('applications')
         .update({ status: 'approved' })
         .eq('id', appId);
 
-    if (appError) {
-        console.error('❌ Error updating application status:', appError);
-        throw appError;
-    }
+    if (appError) throw appError;
 
-    console.log('✅ Application approved successfully!');
     return { success: true };
 }
 
 export async function rejectApplication(appId) {
+    if (!supabase) throw new Error('Database connection required.');
     const { error } = await supabase
         .from('applications')
         .update({ status: 'rejected' })
@@ -279,6 +297,7 @@ export async function rejectApplication(appId) {
 }
 
 export async function deleteCourse(id) {
+    if (!supabase) throw new Error('Database connection required.');
     const { error } = await supabase
         .from('courses')
         .delete()
@@ -289,6 +308,7 @@ export async function deleteCourse(id) {
 }
 
 export async function endCourse(id) {
+    if (!supabase) throw new Error('Database connection required.');
     const { error } = await supabase
         .from('courses')
         .update({ status: 'ended' })
@@ -302,8 +322,8 @@ export async function getEndedCourses() {
     return getCourses('ended');
 }
 
-
 export async function deleteEnrollment(id) {
+    if (!supabase) throw new Error('Database connection required.');
     const { error } = await supabase
         .from('enrollments')
         .delete()

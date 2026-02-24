@@ -32,63 +32,79 @@ const routes = {
 
 const router = async () => {
     const content = document.getElementById('app');
-    const url = location.hash.slice(1).toLowerCase() || '/';
+    try {
+        const url = location.hash.slice(1).toLowerCase() || '/';
 
-    // 1. Admin Auth Check
-    if (url.startsWith('/admin') && url !== '/admin/login') {
-        if (!localStorage.getItem('nexus_admin_token')) {
-            window.location.hash = '/admin/login';
-            return;
+        // 1. Admin Auth Check
+        if (url.startsWith('/admin') && url !== '/admin/login') {
+            if (!localStorage.getItem('nexus_admin_token')) {
+                window.location.hash = '/admin/login';
+                return;
+            }
         }
-    }
 
-    // 2. Resolve Page
-    let page = routes[url];
+        // 2. Resolve Page
+        let page = routes[url];
 
-    // Handle dynamic routes if exact match fails
-    if (!page) {
-        const request = parseRequestURL();
-        if (request.resource === 'course' && request.id) {
-            page = Course;
+        // Handle dynamic routes if exact match fails
+        if (!page) {
+            const request = parseRequestURL();
+            if (request.resource === 'course' && request.id) {
+                page = Course;
+            } else {
+                // 404
+                page = Home;
+            }
+        }
+
+        // 3. Render
+        if (url.startsWith('/admin')) {
+            // --- Admin Layout ---
+            // Remove public navbar if it exists
+            const nav = document.getElementById('header_nav');
+            if (nav) nav.remove();
+
+            // Render Page inside Layout (except Login)
+            if (url === '/admin/login') {
+                content.innerHTML = await page.render();
+                if (page.afterRender) await page.afterRender();
+            } else {
+                const pageContent = await page.render();
+                content.innerHTML = await AdminLayout.render(pageContent);
+
+                if (AdminLayout.afterRender) await AdminLayout.afterRender();
+                if (page.afterRender) await page.afterRender();
+            }
+
         } else {
-            // 404
-            page = Home;
-        }
-    }
+            // --- Public Layout ---
+            const nav = document.getElementById('header_nav');
+            if (!nav) {
+                const navContainer = document.createElement('div');
+                navContainer.id = 'header_nav';
+                document.body.prepend(navContainer);
+                navContainer.innerHTML = await Navbar.render();
+            }
+            // Always refresh auth links on navigation
+            try {
+                await Navbar.afterRender();
+            } catch (authError) {
+                console.warn('Navbar afterRender failed:', authError);
+            }
 
-    // 3. Render
-    if (url.startsWith('/admin')) {
-        // --- Admin Layout ---
-        // Remove public navbar if it exists
-        const nav = document.getElementById('header_nav');
-        if (nav) nav.remove();
-
-        // Render Page inside Layout (except Login)
-        if (url === '/admin/login') {
             content.innerHTML = await page.render();
             if (page.afterRender) await page.afterRender();
-        } else {
-            const pageContent = await page.render();
-            content.innerHTML = await AdminLayout.render(pageContent);
-
-            if (AdminLayout.afterRender) await AdminLayout.afterRender();
-            if (page.afterRender) await page.afterRender();
         }
-
-    } else {
-        // --- Public Layout ---
-        const nav = document.getElementById('header_nav');
-        if (!nav) {
-            const navContainer = document.createElement('div');
-            navContainer.id = 'header_nav';
-            document.body.prepend(navContainer);
-            navContainer.innerHTML = await Navbar.render();
-        }
-        // Always refresh auth links on navigation
-        await Navbar.afterRender();
-
-        content.innerHTML = await page.render();
-        if (page.afterRender) await page.afterRender();
+    } catch (error) {
+        console.error('Routing Error:', error);
+        content.innerHTML = `
+            <div class="container" style="padding: 4rem; text-align: center;">
+                <h1 style="font-size: 2rem; color: var(--color-primary); margin-bottom: 1rem;">Oops! Something went wrong</h1>
+                <p style="color: var(--color-text-muted); margin-bottom: 2rem;">We had trouble loading this page. This might be due to a connection issue with our database.</p>
+                <button onclick="location.reload()" class="btn btn-primary">Try Refreshing</button>
+                <p style="margin-top: 2rem; font-size: 0.8rem; color: #666;">Error: ${error.message}</p>
+            </div>
+        `;
     }
 };
 

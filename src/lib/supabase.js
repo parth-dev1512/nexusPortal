@@ -5,7 +5,10 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
 if (!supabaseUrl || !supabaseAnonKey) {
-    console.warn('Supabase URL or Key missing. Backend features will not work.')
+    console.error('Supabase URL or Key missing. Backend features will not work. Please check your .env file or GitHub Secrets.')
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+// Safely initialize or export null so components can handle it or my router try-catch can catch it later.
+export const supabase = (supabaseUrl && supabaseAnonKey)
+    ? createClient(supabaseUrl, supabaseAnonKey)
+    : null;

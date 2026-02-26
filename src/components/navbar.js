@@ -12,7 +12,7 @@ const Navbar = {
             <a href="/#/search">Find Course</a>
             <a href="/#/register" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.9rem;">Start Teaching</a>
             <div id="auth-links">
-              <a href="/#/login" style="margin-top: 4px; display: inline-block;">
+              <a href="/#/login" style="margin-top: 40px; display: inline-block;">
                 Log In
               </a>
             </div>

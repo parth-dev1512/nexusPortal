@@ -111,12 +111,7 @@ const Home = {
     return `
       <section class="container fade-in" style="padding-top: var(--spacing-xl); padding-bottom: var(--spacing-xl);">
         
-        <header style="text-align: center; margin-bottom: var(--spacing-xl);">
-          <h1 style="margin-bottom: 0.5rem;">Ashoka's skill sharing platform</h1>
-          <p style="font-size: 1.1rem; color: var(--color-text-muted); max-width: 600px; margin: 0 auto;">
-            Discover peer-taught courses, expand your critical thinking, and share your knowledge with the Ashoka community.
-          </p>
-        </header>
+        
 
         <!-- Upcoming Sessions Schedule -->
         <section style="margin-bottom: var(--spacing-xl);">

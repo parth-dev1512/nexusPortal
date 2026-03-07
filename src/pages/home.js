@@ -1,5 +1,4 @@
 import { getCourses } from '../lib/api.js';
-import mockCourses from '../data/courses.js';
 
 // Format date nicely: "Mon, 24 Feb"
 function formatDate(dateStr) {
@@ -23,12 +22,33 @@ function isToday(dateStr) {
 const Home = {
   render: async () => {
     let courses = [];
+    let error = null;
     try {
-      const apiCourses = await getCourses();
-      courses = (apiCourses && apiCourses.length > 0) ? apiCourses : mockCourses;
+      courses = await getCourses();
+      if (!courses || courses.length === 0) {
+        // Option: we could treat empty courses as a non-error but show a "no courses" message
+        // However, the user wants to load from DB and show error if unable.
+      }
     } catch (e) {
-      console.warn('API fetch failed, falling back to mock', e);
-      courses = mockCourses;
+      console.error('Failed to load courses from database:', e);
+      error = "Unable to connect to the database. Please check your connection or try again later.";
+    }
+
+    if (error) {
+      return `
+        <div class="container fade-in" style="padding: 4rem 1rem; text-align: center;">
+          <div class="neo-box" style="padding: 2rem; background: #fff; max-width: 600px; margin: 0 auto;">
+            <h1 style="color: var(--color-primary); margin-bottom: 1.5rem;">Connection Error</h1>
+            <p style="color: var(--color-text-muted); margin-bottom: 2rem; font-size: 1.1rem;">
+              We're having trouble reaching our database to load the latest courses.
+            </p>
+            <div style="background: #fff5f5; border: 1px solid #feb2b2; color: #c53030; padding: 1rem; border-radius: 4px; margin-bottom: 2rem; font-size: 0.9rem; font-family: monospace; word-break: break-word;">
+              ${error}
+            </div>
+            <button onclick="location.reload()" class="btn btn-primary" style="width: 100%;">Try Again</button>
+          </div>
+        </div>
+      `;
     }
 
     const today = new Date().toISOString().split('T')[0];
@@ -74,22 +94,7 @@ const Home = {
             </div>
             <div style="display: flex; flex-direction: column; gap: 0.75rem;">
               ${sessions.map(s => `
-                <a href="/#/course/${s.course.id}" style="
-                  display: grid;
-                  grid-template-columns: 120px 1fr auto;
-                  align-items: center;
-                  gap: 1.5rem;
-                  padding: 1rem 1.25rem;
-                  background: #fff;
-                  border: 2px solid #000;
-                  box-shadow: 3px 3px 0px #000;
-                  text-decoration: none;
-                  color: #000;
-                  transition: transform 0.1s, box-shadow 0.1s;
-                "
-                onmouseover="this.style.transform='translate(-2px,-2px)';this.style.boxShadow='5px 5px 0px #000'"
-                onmouseout="this.style.transform='';this.style.boxShadow='3px 3px 0px #000'"
-                >
+                <a href="/#/course/${s.course.id}" class="schedule-row">
                   <div style="font-family: var(--font-display); font-weight: 800; font-size: 1rem; color: var(--color-primary); white-space: nowrap;">
                     ${formatTime(s.start_time)}<br>
                     <span style="font-size: 0.75rem; color: #888; font-weight: 600;">→ ${formatTime(s.end_time)}</span>
@@ -98,7 +103,7 @@ const Home = {
                     <div style="font-weight: 800; font-size: 1.05rem; text-transform: uppercase; letter-spacing: 0.5px;">${s.course.title}</div>
                     <div style="font-size: 0.85rem; color: #666; margin-top: 0.2rem;">${s.course.instructor}</div>
                   </div>
-                  <div style="font-size: 0.8rem; color: #888; text-align: right; white-space: nowrap;">
+                  <div class="schedule-location" style="font-size: 0.8rem; color: #888; text-align: right; white-space: nowrap;">
                     ${s.course.location || ''}
                   </div>
                 </a>
@@ -118,7 +123,7 @@ const Home = {
         <!-- Upcoming Sessions Schedule -->
         <section style="margin-bottom: var(--spacing-xl);">
           <h2 style="margin-bottom: var(--spacing-md);">Upcoming Sessions</h2>
-          <div class="neo-box" style="padding: 2rem; background: #fff;">
+          <div class="neo-box" style="padding: 1.5rem; background: #fff;">
             ${scheduleHtml}
           </div>
         </section>

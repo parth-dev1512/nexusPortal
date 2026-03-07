@@ -30,7 +30,7 @@ const StudentDashboard = {
     return `
       <section class="container fade-in" style="padding-top: var(--spacing-xl); padding-bottom: var(--spacing-xl);">
         
-        <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <header class="dashboard-header">
           <div>
             <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem; color: #fff;">My Journey</h1>
             <p style="color: var(--color-accent); font-size: 1.1rem;">Welcome back, ${user.name}</p>
@@ -52,7 +52,7 @@ const StudentDashboard = {
         : 'No upcoming sessions';
 
       return `
-                  <div class="course-row card" style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; align-items: center; padding: 1rem; border: 2px solid #000; box-shadow: 4px 4px 0px #000; background: #fff; margin-bottom: 0.5rem;">
+                  <div class="course-row card dashboard-enrollment-row">
                     
                     <div>
                       <h3 style="margin: 0; font-size: 1.2rem; color: #000; text-transform: uppercase;">${c.title}</h3>
@@ -104,7 +104,7 @@ const StudentDashboard = {
           ${applications.length > 0 ? `
             <div style="display: flex; flex-direction: column; gap: 1rem;">
               ${applications.map(app => `
-                  <div class="card" style="display: grid; grid-template-columns: 2fr 1fr; align-items: center; padding: 1rem; border: 2px solid #000; box-shadow: 4px 4px 0px #000; background: #f8fafc;">
+                  <div class="card dashboard-proposal-row">
                     <div>
                       <h3 style="margin: 0; font-size: 1.1rem; color: #000; text-transform: uppercase;">${app.course_title}</h3>
                       <span style="font-size: 0.85rem; color: #666;">Submitted on ${new Date(app.submitted_at).toLocaleDateString()}</span>

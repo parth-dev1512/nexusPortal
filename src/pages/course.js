@@ -1,5 +1,4 @@
 import { getCourseById, enrollStudent } from '../lib/api.js';
-import mockCourses from '../data/courses.js';
 import { showToast } from '../components/toast.js';
 
 const Course = {
@@ -8,14 +7,10 @@ const Course = {
     const id = request.id;
     let course = null;
 
-    if (id && id.startsWith('course-')) {
-      course = mockCourses.find(c => c.id === id);
-    } else {
-      course = await getCourseById(id);
-    }
+    course = await getCourseById(id);
 
     if (!course) {
-      return `<div class="container" style="padding: 4rem; text-align: center;"><h2>Course not found</h2><a href="/#/" class="btn btn-secondary">Go Home</a></div>`;
+      return `<div class="container" style="padding: 4rem 1rem; text-align: center;"><h2>Course not found</h2><a href="/#/" class="btn btn-secondary">Go Home</a></div>`;
     }
 
     const today = new Date().toISOString().split('T')[0];
@@ -60,7 +55,7 @@ const Course = {
         </a>
 
         <!-- Hero Header -->
-        <div class="neo-box" style="background: var(--color-primary); padding: 3rem; margin-bottom: 2rem; position: relative; overflow: hidden;">
+        <div class="neo-box course-hero" style="background: var(--color-primary); padding: 3rem; margin-bottom: 2rem; position: relative; overflow: hidden;">
           <div style="position: absolute; top: -20px; right: -20px; width: 200px; height: 200px; border: 4px solid rgba(255,255,255,0.1); border-radius: 50%;"></div>
           <div style="position: absolute; bottom: -40px; right: 60px; width: 120px; height: 120px; border: 4px solid rgba(255,255,255,0.08); border-radius: 50%;"></div>
           <div style="position: relative; z-index: 1;">
@@ -69,7 +64,7 @@ const Course = {
                 <span style="background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.3); padding: 0.25rem 0.75rem; font-size: 0.8rem; font-family: var(--font-display); font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">${tag}</span>
               `).join('')}
             </div>
-            <h1 style="font-size: 3rem; color: #fff; margin-bottom: 0.75rem; text-shadow: 3px 3px 0px rgba(0,0,0,0.3); line-height: 1.1;">${course.title}</h1>
+            <h1 style="color: #fff; margin-bottom: 0.75rem; text-shadow: 3px 3px 0px rgba(0,0,0,0.3); line-height: 1.1;">${course.title}</h1>
             <p style="font-size: 1.2rem; color: rgba(255,255,255,0.85); font-family: var(--font-body);">Taught by <strong style="color: #fff;">${course.instructor}</strong></p>
           </div>
         </div>
@@ -78,7 +73,7 @@ const Course = {
         <div class="grid-cols-3" style="gap: 2rem; align-items: start;">
 
           <!-- Main Content -->
-          <div style="grid-column: span 2; display: flex; flex-direction: column; gap: 2rem;">
+          <div class="course-main-content">
 
             <div class="neo-box" style="background: #fff; padding: 2rem;">
               <h2 style="color: #000; margin-bottom: 1rem; font-size: 1.5rem;">About this Course</h2>
@@ -93,7 +88,7 @@ const Course = {
           </div>
 
           <!-- Sidebar -->
-          <aside style="grid-column: span 1; position: sticky; top: 100px; display: flex; flex-direction: column; gap: 1.5rem;">
+          <aside class="course-sidebar">
 
             <div class="neo-box" style="background: #fff; padding: 1.75rem;">
               <h3 style="color: #000; margin-bottom: 1.25rem; padding-bottom: 0.75rem; border-bottom: 3px solid #000; font-size: 1.1rem; text-transform: uppercase;">Course Details</h3>
@@ -167,7 +162,7 @@ const Course = {
 
               <div class="form-group">
                 <label for="student-email">Ashoka Email</label>
-                <input type="email" id="student-email" required placeholder="name.lastname@ashoka.edu.in" pattern=".+@ashoka\.edu\.in">
+                <input type="email" id="student-email" required placeholder="name.lastname@ashoka.edu.in" pattern=".+@ashoka\\.edu\\.in">
                 <small style="color: #666; font-size: 0.8rem; margin-top: 0.25rem;">Must be @ashoka.edu.in</small>
               </div>
 

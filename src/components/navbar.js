@@ -5,16 +5,17 @@ const Navbar = {
     return `
       <nav>
         <div class="container nav-content">
-          <a href="/#/admin/login" style="text-decoration: none; font-size: 9px; font-weight: 900; background: #000; color: #fdb913; border-right: 2px solid #000; border-bottom: 2px solid #000; padding: 3px 8px; position: absolute; top: 0; left: 0; z-index: 1000; letter-spacing: 1px;">ADMIN</a>
-          <a href="/#" class="logo">NEXUS</a>
-          <div class="nav-links">
+          <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <a href="/#" class="logo">NEXUS</a>
+            <a href="/#/admin/login" class="admin-badge">ADMIN</a>
+          </div>
+          <button class="hamburger-btn" id="hamburger-btn" aria-label="Menu">☰</button>
+          <div class="nav-links" id="nav-links">
             <a href="/#/">Schedule</a>
             <a href="/#/search">Find Course</a>
             <a href="/#/register" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.9rem;">Start Teaching</a>
-            <div id="auth-links">
-              <a href="/#/login" style="margin-top: 45px; display: inline-block;">
-                Log In
-              </a>
+            <div id="auth-links" class="nav-auth-links">
+              <a href="/#/login">Log In</a>
             </div>
           </div>
         </div>
@@ -22,6 +23,24 @@ const Navbar = {
     `;
   },
   afterRender: async () => {
+    // Hamburger toggle
+    const hamburgerBtn = document.getElementById('hamburger-btn');
+    const navLinks = document.getElementById('nav-links');
+    if (hamburgerBtn && navLinks) {
+      hamburgerBtn.addEventListener('click', () => {
+        navLinks.classList.toggle('open');
+        hamburgerBtn.textContent = navLinks.classList.contains('open') ? '✕' : '☰';
+      });
+
+      // Close menu when a link is tapped
+      navLinks.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+          navLinks.classList.remove('open');
+          hamburgerBtn.textContent = '☰';
+        });
+      });
+    }
+
     try {
       const container = document.getElementById('auth-links');
       if (!container) return;

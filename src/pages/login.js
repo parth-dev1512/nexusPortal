@@ -4,7 +4,7 @@ import { showToast } from '../components/toast.js';
 const Login = {
   render: async () => {
     return `
-      <section class="container fade-in" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 80vh; padding: 2rem 0;">
+      <section class="container fade-in login-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 80vh; padding: 2rem 0;">
 
         <div class="neo-box" style="width: 100%; max-width: 440px; background: #fff; padding: 0; overflow: hidden;">
 

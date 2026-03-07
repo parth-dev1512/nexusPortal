@@ -2,8 +2,14 @@ const AdminLayout = {
   render: async (content) => {
     return `
       <div class="admin-layout" style="display: flex; min-height: 100vh;">
+        <!-- Mobile Toggle Button -->
+        <button class="admin-mobile-toggle" id="admin-sidebar-toggle">☰</button>
+        
+        <!-- Overlay (mobile only) -->
+        <div class="admin-overlay" id="admin-overlay"></div>
+
         <!-- Sidebar -->
-        <aside style="width: 250px; background: #000; color: #fff; display: flex; flex-direction: column; position: fixed; height: 100vh; padding: 2rem 1rem;">
+        <aside class="admin-sidebar" id="admin-sidebar">
           <div style="margin-bottom: 3rem; text-align: center;">
              <h2 style="font-family: var(--font-display); color: var(--color-primary); letter-spacing: -1px; font-size: 1.5rem;">NEXUS ADMIN</h2>
           </div>
@@ -26,7 +32,7 @@ const AdminLayout = {
         </aside>
 
         <!-- Main Content -->
-        <main style="flex: 1; margin-left: 250px; padding: 3rem; background: var(--color-bg-deep);">
+        <main class="admin-main">
           ${content}
         </main>
       </div>
@@ -46,6 +52,37 @@ const AdminLayout = {
       localStorage.removeItem('nexus_admin_token');
       window.location.hash = '/admin/login';
     });
+
+    // Mobile sidebar toggle
+    const toggleBtn = document.getElementById('admin-sidebar-toggle');
+    const sidebar = document.getElementById('admin-sidebar');
+    const overlay = document.getElementById('admin-overlay');
+
+    if (toggleBtn && sidebar && overlay) {
+      const closeSidebar = () => {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('open');
+        toggleBtn.textContent = '☰';
+      };
+
+      toggleBtn.addEventListener('click', () => {
+        const isOpen = sidebar.classList.contains('open');
+        if (isOpen) {
+          closeSidebar();
+        } else {
+          sidebar.classList.add('open');
+          overlay.classList.add('open');
+          toggleBtn.textContent = '✕';
+        }
+      });
+
+      overlay.addEventListener('click', closeSidebar);
+
+      // Close sidebar when a nav link is clicked on mobile
+      sidebar.querySelectorAll('.admin-link').forEach(link => {
+        link.addEventListener('click', closeSidebar);
+      });
+    }
   }
 };
 

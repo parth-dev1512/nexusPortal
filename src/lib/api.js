@@ -9,9 +9,9 @@ export async function adminLogin(username, password) {
         return { success: true, adminId: 'mock-admin' };
     }
 
-    // 2. Check for missing Supabase connection
+    // 2. Error if Supabase is not initialized
     if (!supabase) {
-        return { success: false, message: 'Database offline. Please use mock credentials (admin / admin123) or restore your Supabase project.' };
+        throw new Error('Database connection is not established. Please check your configuration.');
     }
 
     const { data, error } = await supabase
@@ -35,11 +35,7 @@ export async function adminLogin(username, password) {
 // --- COURSES ---
 
 export async function getCourses(status = 'approved') {
-    if (!supabase) {
-        console.warn('Supabase offline, returning mock courses');
-        const mock = (await import('../data/courses.js')).default;
-        return mock.filter(c => !status || c.status === status || (status === 'approved' && (!c.status || c.status === 'approved')));
-    }
+    if (!supabase) throw new Error('Database connection required');
 
     let query = supabase
         .from('courses')
@@ -60,10 +56,7 @@ export async function getCourses(status = 'approved') {
 }
 
 export async function getCourseById(id) {
-    if (!supabase || id.startsWith('course-')) {
-        const mock = (await import('../data/courses.js')).default;
-        return mock.find(c => c.id === id) || null;
-    }
+    if (!supabase) throw new Error('Database connection required');
 
     // 1. Get Course Details
     const { data: course, error: courseError } = await supabase
@@ -93,10 +86,7 @@ export async function getCourseById(id) {
 // --- APPLICATIONS ---
 
 export async function submitApplication(appData) {
-    if (!supabase) {
-        console.log('Mock: Application submitted', appData);
-        return { success: true, mock: true };
-    }
+    if (!supabase) throw new Error('Database connection required');
 
     const { data, error } = await supabase
         .from('applications')
@@ -137,10 +127,7 @@ export async function getUserApplications(email) {
 // --- ENROLLMENTS ---
 
 export async function enrollStudent(courseId, studentDetails) {
-    if (!supabase) {
-        console.log('Mock: Student enrolled', studentDetails);
-        return { success: true, mock: true };
-    }
+    if (!supabase) throw new Error('Database connection required');
 
     const userJson = localStorage.getItem('nexus_user');
     if (!userJson) throw new Error('User must be logged in to enroll');
@@ -210,9 +197,7 @@ export async function getUserEnrollments(email) {
 // --- ADMIN ---
 
 export async function getDashboardStats() {
-    if (!supabase) {
-        return { pendingApps: 0, activeCourses: 5 }; // Mock values
-    }
+    if (!supabase) throw new Error('Database connection required');
 
     const { count: pendingApps } = await supabase
         .from('applications')

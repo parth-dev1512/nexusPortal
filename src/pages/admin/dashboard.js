@@ -43,7 +43,7 @@ const AdminDashboard = {
 
         <div style="margin-top: 3rem; background: #2a2a2a; padding: 2rem; border: 1px solid #444; border-radius: 8px;">
             <h2 style="color: #fff; margin-bottom: 1rem;">System Status</h2>
-            <div style="display: flex; gap: 2rem; color: #ccc;">
+            <div style="display: flex; gap: 2rem; color: #ccc; flex-wrap: wrap;">
                 <div>Backend: <span style="color: #4ade80;">Online (Supabase)</span></div>
                 <div>Version: <span style="color: #fff;">v1.0.2</span></div>
             </div>

@@ -1,5 +1,4 @@
 import { getCourses } from '../lib/api.js';
-import mockCourses from '../data/courses.js';
 
 const Search = {
   render: async () => {
@@ -22,17 +21,12 @@ const Search = {
     const input = document.getElementById('search-input');
     const container = document.getElementById('results-container');
 
-    let courses = [];
     try {
-      const apiCourses = await getCourses();
-      if (apiCourses && apiCourses.length > 0) {
-        courses = apiCourses;
-      } else {
-        courses = mockCourses;
-      }
+      courses = await getCourses();
     } catch (e) {
-      console.warn('API fetch failed, falling back to mock', e);
-      courses = mockCourses;
+      console.error('API fetch failed:', e);
+      container.innerHTML = `<div style="grid-column: span 3; text-align: center; color: var(--color-text-muted); padding: 4rem;"><h3>Error loading courses</h3><p>Please check your connection and try again.</p></div>`;
+      return;
     }
 
     const renderResults = (query) => {

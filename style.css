@@ -188,7 +188,7 @@ nav {
 .nav-links {
   display: flex;
   gap: 1.5rem;
-  align-items: center; 
+  align-items: center;
 }
 
 .nav-links a {
@@ -353,6 +353,9 @@ textarea:focus {
   border: 1px solid var(--color-accent);
   font-family: var(--font-display);
   transition: background 0.15s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .admin-badge:hover {
@@ -363,7 +366,7 @@ textarea:focus {
    NAV AUTH LINKS (spacing in mobile menu)
    ======================================== */
 .nav-auth-links {
-  margin-top: 0.5rem;
+  margin-top: 1.5rem;
 }
 
 /* ========================================
@@ -541,6 +544,22 @@ textarea:focus {
   /* --- Navbar --- */
   .hamburger-btn {
     display: block;
+  }
+
+  .admin-badge {
+    aspect-ratio: 1 / 1;
+    height: auto;
+    width: auto;
+    align-self: stretch;
+    padding: 0 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .admin-badge svg {
+    width: 18px;
+    height: 18px;
   }
 
   .nav-links {
